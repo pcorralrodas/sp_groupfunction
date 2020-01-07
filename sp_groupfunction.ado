@@ -18,6 +18,7 @@ program define sp_groupfunction, eclass
 		mean(varlist numeric)
 		gini(varlist numeric)
 		theil(varlist numeric)
+		slow
 		conditional
 	];
 #delimit cr;
@@ -192,8 +193,8 @@ if ("`poverty'"!=""){
 
 gen double _population=`w'
 
-groupfunction [aw=`w'], mean(`mean2' `coverage2' `allpov' `alldep') ///
-sum(`targeting2' `benefits2' `beneficiaries2') rawsum(_population) by(`by') norestore gini(`gini2') theil(`theil2')
+qui: groupfunction [aw=`w'], mean(`mean2' `coverage2' `allpov' `alldep') ///
+sum(`targeting2' `benefits2' `beneficiaries2') rawsum(_population) by(`by') norestore gini(`gini2') theil(`theil2') `slow'
 
 if ("`mean2'"!="") local reshape1 `reshape1' _mea_
 if ("`theil2'"!="") local reshape1 `reshape1' _the_
@@ -215,8 +216,15 @@ local _ben1_ beneficiaries
 local _gin_  gini
 local _the_  theil
 
+cap which parallel
+if _rc==0{
+	dis as error "YAY - parallel!"
+	sort `by'
+	parallel initialize `c(processors)'
+	parallel, by(`by'): reshape long `reshape1', i(`by') j(_indicator) string
+}
+else reshape long `reshape1', i(`by') j(_indicator) string
 
-reshape long `reshape1', i(`by') j(_indicator) string
 foreach x of local reshape1{
 	rename `x' value`x'
 }
