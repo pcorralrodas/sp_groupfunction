@@ -219,9 +219,8 @@ local _the_  theil
 cap which parallel
 if _rc==0{
 	dis as error "YAY - parallel!"
-	sort `by'
 	parallel initialize `c(processors)'
-	parallel, by(`by'): reshape long `reshape1', i(`by') j(_indicator) string
+	parallel, by(`by') force: reshape long `reshape1', i(`by') j(_indicator) string
 }
 else reshape long `reshape1', i(`by') j(_indicator) string
 
