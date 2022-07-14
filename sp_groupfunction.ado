@@ -195,7 +195,6 @@ gen double _population=`w'
 
 qui: groupfunction [aw=`w'], mean(`mean2' `coverage2' `allpov' `alldep') ///
 sum(`targeting2' `benefits2' `beneficiaries2') rawsum(_population) by(`by') norestore gini(`gini2') theil(`theil2') `slow'
-
 if ("`mean2'"!="") local reshape1 `reshape1' _mea_
 if ("`theil2'"!="") local reshape1 `reshape1' _the_
 if ("`gini2'"!="") local reshape1 `reshape1' _gin_
@@ -215,6 +214,75 @@ local _ben_  benefits
 local _ben1_ beneficiaries
 local _gin_  gini
 local _the_  theil
+
+//Determine size of new dataset
+unab ALL: _*
+local michaels: list sizeof ALL
+local pop _population
+local ALLnopop: list ALL - pop
+count
+local mirows = r(N)
+foreach x of local ALLnopop{
+	putmata `x' = `x'
+}
+
+drop `ALLnopop'
+tempfile final
+save `final'
+gen value = .
+tokenize `ALLnopop'
+mata: st_store(.,"value",(`1'))
+gen _indicator = "`1'"
+
+dis as error "`reshape1'"
+forval z=2/`=`michaels'-2'{
+	append using `final', force gen(id)
+	mata: st_store(.,"value","id",(``z''))
+	replace _indicator = "``z''" if id==1
+	drop id
+}
+gen measure = ""
+split _indicator, parse("__")
+replace _indicator1 = _indicator1+"_" 
+foreach x of local reshape1{
+	replace measure = "``x''" if _indicator1=="`x'"
+}
+levelsof _indicator2, local(_myvar1)
+foreach x of local _myvar1{
+	replace _indicator2 = "`_`x''" if _indicator2=="`x'"
+}
+
+rename _indicator2 variable
+
+cap confirm string variable _indicator3
+local doref = _rc==0
+if (`doref'==1){
+
+	replace measure = measure+substr(_indicator3,-1,1) if measure=="fgt"
+	
+	gen _x = substr(_indicator3,-2,.)
+	gen _h = subinstr(_indicator3, _x, "",.) if measure=="fgt"
+	replace _h = _indicator3 if measure!="fgt"
+	drop _x _indicator3
+}
+
+if (`doref'==1){
+	forval z=0/2{
+		replace _h = subinstr(_h, "_`z'", "",.) if regexm(measure,"fgt")==1
+	}
+	
+	levelsof _h, local(_myvar1)
+	foreach x of local _myvar1{
+		replace _h = "`_`x''" if _h=="`x'"
+	}
+	rename _h reference
+}
+
+drop _ind*
+
+}
+end
+/*
 
 cap which parallel
 if _rc==0{
