@@ -220,8 +220,6 @@ unab ALL: _*
 local michaels: list sizeof ALL
 local pop _population
 local ALLnopop: list ALL - pop
-count
-local mirows = r(N)
 foreach x of local ALLnopop{
 	putmata `x' = `x'
 }
@@ -233,13 +231,14 @@ gen value = .
 tokenize `ALLnopop'
 mata: st_store(.,"value",(`1'))
 gen _indicator = "`1'"
+mata:mata drop `1'
 
-dis as error "`reshape1'"
-forval z=2/`=`michaels'-2'{
+forval z=2/`=`michaels'-1'{
 	append using `final', force gen(id)
 	mata: st_store(.,"value","id",(``z''))
 	replace _indicator = "``z''" if id==1
 	drop id
+	mata:mata drop ``z''
 }
 gen measure = ""
 split _indicator, parse("__")
