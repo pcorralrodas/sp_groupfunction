@@ -1,0 +1,11 @@
+v 1.0.0
+d 'SP_GROUPFUNCTION': sp_groupfunction
+d 
+d Command to compute poverty and inequality statistics by group.
+d 
+d Distribution-Date:   20220729
+d License: Academic Free License v3.0
+d 
+F s/sp_groupfunction.ado
+F s/sp_groupfunction.sthlp
+f testing.do

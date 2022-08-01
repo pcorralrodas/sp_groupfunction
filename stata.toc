@@ -1,0 +1,8 @@
+v 1.0.0
+d Materials by Paul Corral
+d The World Bank - Poverty and Equity Global Practice
+d pcorralrodas@worldbank.org
+
+d 'sp_groupfunction': Command to compute poverty and inequality statistics by group.
+
+p sp_groupfunction
