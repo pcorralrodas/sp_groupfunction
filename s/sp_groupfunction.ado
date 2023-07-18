@@ -89,6 +89,7 @@ foreach y in coverage dependency dependency_d poverty povertyline mean targeting
 		foreach x of local `y'{
 			local _`y'1 `_`y'1' ``x''
 		}
+		local _`y'1: list uniq _`y'1
 	}
 }
 
